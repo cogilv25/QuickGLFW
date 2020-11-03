@@ -6,7 +6,6 @@ workspace "Quick Start GLFW"
 
 
 project "Quick Start GLFW"
-	kind "ConsoleApp"
 	language "C++"
 
 	targetdir("bin/%{cfg.platform}/%{cfg.buildcfg}")
@@ -16,11 +15,13 @@ project "Quick Start GLFW"
 
 	filter "configurations:Debug"
 		defines "_DEBUG"
+		kind "ConsoleApp"
 		symbols "On"
 		linkoptions {"/NODEFAULTLIB:MSVCRT"}
 
 	filter "configurations:Release"
 		defines "_RELEASE"
+		kind "WindowedApp"
 		optimize "On"
 
 	filter { "platforms:x86" }
@@ -35,6 +36,12 @@ project "Quick Start GLFW"
 		cppdialect "C++17"
 		systemversion "latest"
 
+
+		prebuildcommands
+		{
+			("rmdir /Q /S shaders"),
+			("rmdir /Q /S \"bin/%{cfg.platform}/%{cfg.buildcfg}/shaders\"")
+		}
 
 		postbuildcommands
 		{
