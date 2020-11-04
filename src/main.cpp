@@ -3,26 +3,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include "Texture.h"
+#include "ModelBuilder.h"
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 
 int windowWidth = 1000, windowHeight = 1000;
 
-float vertices[] = {
-	// positions		// texture coords
-	 0.5f,  0.5f, 0.0f,		1.0f, 1.0f,		// top right		
-	 0.5f, -0.5f, 0.0f,		1.0f, 0.0f,		// bottom right
-	-0.5f, -0.5f, 0.0f,		0.0f, 0.0f,		// bottom left
-	-0.5f,  0.5f, 0.0f,		0.0f, 1.0f		// top left 
-};
-unsigned int indices[] = {  // note that we start from 0!
-	0, 1, 3,   // first triangle
-	1, 2, 3    // second triangle
-};
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -91,32 +79,17 @@ int main()
 	glDebugMessageCallbackARB(openGLDebugCallback, 0);
 #endif
 
-	glEnable(GL_BLEND);// you enable blending function
+	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glViewport(0, 0, windowWidth, windowHeight);
 	glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
 
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
 
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
+	ModelBuilder builder;
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+	Model* model1 = builder.buildPlane(1.0f, 1.0f, 0.0f);
 
 	//Load Texture
 
@@ -130,13 +103,13 @@ int main()
 
 	glUniform1i(glGetUniformLocation(shadey.id, "tex"), 0);
 
+	glBindVertexArray(model1->id);
+
 	while (GLFW_FALSE == glfwWindowShouldClose(window))
 	{
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		float gbValue = (sin(glfwGetTime()) + 1.0f)/12.0f + 0.5f;
 
 		float yscale = 500.0f / (float)windowHeight;
 		float xscale = 500.0f / (float)windowWidth;
@@ -156,7 +129,7 @@ int main()
 		int colourLocation = glGetUniformLocation(shadey.id, "Colour");
 		int MVPLocation = glGetUniformLocation(shadey.id, "MVP");
 
-		glUniform4f(colourLocation, 1.0f, gbValue, gbValue, 1.3f - gbValue);
+		glUniform4f(colourLocation, 0.0f, 1.0f, 0.0f, 1.0f);
 		glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));
 
 		glActiveTexture(GL_TEXTURE0);
