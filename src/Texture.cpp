@@ -7,13 +7,6 @@
 
 Texture::Texture()
 {
-	id = 0;
-	stbi_set_flip_vertically_on_load(true);
-}
-
-Texture::Texture(const char * fn)
-	:Texture()
-{
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 	// set the texture wrapping/filtering options (on the currently bound texture object)
@@ -21,10 +14,15 @@ Texture::Texture(const char * fn)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+Texture::Texture(const char * path)
+	:Texture()
+{
 	// load and generate the texture
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load(fn, &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		if(nrChannels == 3)
@@ -34,7 +32,7 @@ Texture::Texture(const char * fn)
 		else
 		{
 			// If this ever happens I can deal with it
-			std::cerr << "Error: UNKNOWN: Texture Not RGB or RGBA, Continuing\nFilename: " << fn << std::endl;
+			std::cerr << "Error: UNKNOWN: Texture Not RGB or RGBA, Continuing\nFilename: " << path << std::endl;
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		}
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -49,4 +47,21 @@ Texture::Texture(const char * fn)
 Texture::~Texture()
 {
 	glDeleteTextures(1, &id);
+}
+
+void Texture::initTexture(const float* data, unsigned int nChannels, unsigned int width, unsigned int height)
+{
+	if (data)
+	{
+		if (nChannels > 2 && nChannels < 5)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, (nChannels == 3) ? GL_RGB : GL_RGBA, GL_FLOAT, data);
+	}
+}
+void Texture::initTexture(const unsigned char* data, unsigned int nChannels, unsigned int width, unsigned int height)
+{
+	if (data)
+	{
+		if (nChannels > 2 && nChannels < 5)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, (nChannels == 3) ? GL_RGB : GL_RGBA, GL_FLOAT, data);
+	}
 }
