@@ -1,7 +1,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Shader.h"
+#include "Effect.h"
 #include "Texture.h"
 #include "ModelBuilder.h"
 #include <iostream>
@@ -97,11 +97,16 @@ int main()
 
 	Texture texture2("assets/Matter.png");
 
-	Shader shadey("shaders/simple.vs", "shaders/simple.fs");
-	glUseProgram(shadey.id);
+	Shader shadey1("shaders/simple.fs", GL_FRAGMENT_SHADER);
+	Shader shadey2("shaders/simple.vs", GL_VERTEX_SHADER);
+	Effect effect;
+	effect.addShader(shadey1);
+	effect.addShader(shadey2);
+	effect.build();
+	glUseProgram(effect.id);
 
 
-	glUniform1i(glGetUniformLocation(shadey.id, "tex"), 0);
+	glUniform1i(glGetUniformLocation(effect.id, "tex"), 0);
 
 	glBindVertexArray(model1->id);
 
@@ -126,8 +131,8 @@ int main()
 		MVP = glm::translate(MVP, glm::vec3(xpos, ypos, 0.0f));
 		MVP = glm::scale(MVP, glm::vec3(xscale,yscale,0.0f));
 
-		int colourLocation = glGetUniformLocation(shadey.id, "Colour");
-		int MVPLocation = glGetUniformLocation(shadey.id, "MVP");
+		int colourLocation = glGetUniformLocation(effect.id, "Colour");
+		int MVPLocation = glGetUniformLocation(effect.id, "MVP");
 
 		glUniform4f(colourLocation, 0.0f, 1.0f, 0.0f, 1.0f);
 		glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, glm::value_ptr(MVP));

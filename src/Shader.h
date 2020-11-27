@@ -3,6 +3,8 @@ class Shader
 {
 public:
 	unsigned int id;
-	Shader(const char* vertexShaderFilename, const char* fragmentShaderFilename);
+	unsigned int shaderType;
+	Shader(const char* path, unsigned int type);
+	Shader();
 };
 
